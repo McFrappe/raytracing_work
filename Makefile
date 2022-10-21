@@ -8,3 +8,6 @@ pipe_to_img: build
 
 preview:
 	imgcat image.ppm
+
+clean:
+	rm -rf *.out
