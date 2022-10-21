@@ -1,4 +1,6 @@
 #include <iostream>
+#include "vec3.h"
+#include "color.h"
 
 #define _DIM 256
 
@@ -11,15 +13,12 @@ int main(int argc, char **argv) {
 	for (int i = image_height - 1; i >= 0; i--) {
 		std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
 		for (int j = 0; j < image_width; j++) {
-			auto r = double(j) / (image_width - 1);
-			auto g = double(i) / (image_height - 1);
-			auto b = 0.25;
+			color pixel_color(
+					float(j) / (image_width - 1),
+					float(i) / (image_height - 1),
+					0.25);
 
-			int ir = static_cast<int>(255.999 * r);
-			int ig = static_cast<int>(255.999 * g);
-			int ib = static_cast<int>(255.999 * b);
-
-			printf("%d %d %d", ir, ig, ib);
+			write_color(std::cout, pixel_color);
 		}
 	}
 
