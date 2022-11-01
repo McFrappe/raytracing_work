@@ -10,22 +10,22 @@ bool hit_sphere(const point3 &center, float radius, const ray &r) {
   auto a = dot(r.direction(), r.direction());
   auto b = 2.0 * dot(oc, r.direction());
   auto c = dot(oc, oc) - radius*radius;
-  auto discriminant = b*b - 4*a*c;
-  return (discriminant > 0);
+  auto discriminant = b * b - 4 * a * c;
+  return (discriminant >= 0);
 }
 
 color ray_color(const ray &r) {
   if (hit_sphere(point3(0,0,-1), 0.5, r))
-        return color(1, 0, 0);
+    return color(0.3, 0.2, 0.7);
   vec3 unit_direction = unit_vector(r.direction());
-  float t = 0.5 * (unit_direction.y() + 1.0);
-  return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+  auto t = 0.5*(unit_direction.y() + 1.0);
+  return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char **argv) {
   // image
   const float aspect_ratio 	= 16.0 / 9.0;
-  const int image_width 	= 400;
+  const int image_width 	= 1200;
   const int image_height 	= static_cast<int>(image_width / aspect_ratio);
 
   // camera viewpoint
@@ -44,8 +44,8 @@ int main(int argc, char **argv) {
   for (int i = image_height - 1; i >= 0; i--) {
     std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
     for (int j = 0; j < image_width; j++) {
-      float u = float(j) / (image_width - 1);
-      float v = float(i) / (image_height - 1);
+      float u = float(i) / (image_width - 1);
+      float v = float(j) / (image_height - 1);
       ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
       color pixel_color = ray_color(r);
       write_color(std::cout, pixel_color);
