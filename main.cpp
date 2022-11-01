@@ -4,22 +4,34 @@
 
 #include <iostream>
 
-bool hit_sphere(const point3 &center, float radius, const ray &r) {
+float hit_sphere(const point3 &center, float radius, const ray &r) {
   vec3 oc = r.origin() - center;
 
-  auto a = dot(r.direction(), r.direction());
-  auto b = 2.0 * dot(oc, r.direction());
-  auto c = dot(oc, oc) - radius*radius;
-  auto discriminant = b * b - 4 * a * c;
-  return (discriminant >= 0);
+  float a = dot(r.direction(), r.direction());
+  float b = 2.0 * dot(oc, r.direction());
+  float c = dot(oc, oc) - radius*radius;
+  float discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    return -1.0;
+  } else {
+    return (-b - sqrt(discriminant)) / (2.0 * a);
+  }
 }
 
 color ray_color(const ray &r) {
-  if (hit_sphere(point3(0,0,-1), 0.5, r))
-    return color(0.3, 0.2, 0.7);
+  float t = hit_sphere(point3(0, 0, -1), 0.5, r);
+  if (t > 0.0) {
+    vec3 normal = unit_vector(r.at(t) - vec3(0, 0, -1));
+    return 0.5 * color(
+	normal.x() + 1,
+	normal.y() + 1,
+	normal.z() + 1
+	);
+  }
+
   vec3 unit_direction = unit_vector(r.direction());
-  auto t = 0.5*(unit_direction.y() + 1.0);
-  return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+  t = 0.5*(unit_direction.y() + 1.0);
+  return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
 int main(int argc, char **argv) {
