@@ -1,4 +1,6 @@
+#ifdef OMP
 #include "/opt/homebrew/opt/libomp/include/omp.h"
+#endif
 
 #include "tools.h"
 
@@ -44,9 +46,12 @@ int main(int argc, char **argv) {
   for (int i = image_height - 1; i >= 0; i--) {
     std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
 
+#ifdef OMP
     omp_set_num_threads(NUM_THREADS);
 #pragma omp parallel for \
-    shared(image_width, image_height, samples_per_pixel, i, world, cam)
+    shared(image_width, image_height, samples_per_pixel, i, world, cam) \
+    schedule(static)
+#endif
     for (int j = 0; j < image_width; j++) {
       color pixel_color(0, 0, 0);
 
@@ -56,7 +61,9 @@ int main(int argc, char **argv) {
 	pixel_color += ray_color(cam.get_ray(u, v), world);
       }
 
+#ifdef OMP
 #pragma omp critical
+#endif
       write_color(std::cout, pixel_color, samples_per_pixel);
     }
   }

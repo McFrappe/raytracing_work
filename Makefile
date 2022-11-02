@@ -1,14 +1,16 @@
 RESOLUTION=500
 
+# Additional flags to use when compiling, e.g.
+# make CCFLAGS=-DOUTPUT PROG=exercise2
+CCFLAGS=-DOMP
+
 all: pipe_to_img preview
 
 build:
-	g++ -std=c++11 main.cpp -o main.out
+		/opt/homebrew/opt/gcc/bin/c++-12 -fopenmp -Wall main.cpp $(CCFLAGS) -o main.out
+		# g++ -std=c++11 main.cpp -o main.out
 
-build_mac:
-	/opt/homebrew/opt/gcc/bin/c++-12 -fopenmp -Wall main.cpp -o main.out
-
-pipe_to_img: build_mac
+pipe_to_img: build
 	./main.out $(RESOLUTION) > image.ppm
 	convert image.ppm image.jpeg
 	rm image.ppm
