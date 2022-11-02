@@ -1,11 +1,17 @@
+#include "/opt/homebrew/opt/libomp/include/omp.h"
+
 #include "tools.h"
 
 #include "color.h"
 #include "hittable_list.h"
 #include "sphere.h"
+#include "camera.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <memory>
+
+#define NUM_THREADS 10
 
 color ray_color(const ray &r, const hittable &world) {
   hit_record rec;
@@ -20,35 +26,38 @@ color ray_color(const ray &r, const hittable &world) {
 int main(int argc, char **argv) {
   // image
   const float aspect_ratio 	= 16.0 / 9.0;
-  const int image_width 	= 1200;
+  const int image_width 	= atoi(argv[1]);
   const int image_height 	= static_cast<int>(image_width / aspect_ratio);
+  const int samples_per_pixel 	= 100;
 
   // world attr
   hittable_list world;
   world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
   world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
 
-  // camera viewpoint
-  float viewpoint_height 	= 2.0;
-  float viewpoint_width 	= aspect_ratio * viewpoint_height;
-  float focal_length 		= 1.0;
-
-  point3 origin 		= point3(0, 0, 0);
-  vec3 horizontal 		= vec3(viewpoint_width, 0, 0);
-  vec3 vertical 		= vec3(0, viewpoint_height, 0);
-  vec3 lower_left_corner 	= origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
+  // camera
+  camera cam;
 
   // render image
   printf("P3\n%d %d\n255\n", image_width, image_height);
 
   for (int i = image_height - 1; i >= 0; i--) {
     std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
+
+    omp_set_num_threads(NUM_THREADS);
+#pragma omp parallel for \
+    shared(image_width, image_height, samples_per_pixel, i, world, cam)
     for (int j = 0; j < image_width; j++) {
-      float u = float(j) / (image_width - 1);
-      float v = float(i) / (image_height - 1);
-      ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-      color pixel_color = ray_color(r, world);
-      write_color(std::cout, pixel_color);
+      color pixel_color(0, 0, 0);
+
+      for (int k = 0; k < samples_per_pixel; k++) {
+	float u = (float(j) + random_float()) / (image_width - 1);
+	float v = (float(i) + random_float()) / (image_height - 1);
+	pixel_color += ray_color(cam.get_ray(u, v), world);
+      }
+
+#pragma omp critical
+      write_color(std::cout, pixel_color, samples_per_pixel);
     }
   }
 
