@@ -5,9 +5,11 @@ build:
 
 pipe_to_img: build
 	./main.out > image.ppm
+	convert image.ppm image.jpeg
+	rm image.ppm
 
 preview:
-	imgcat image.ppm
+	imgcat image.jpeg
 
 clean:
 	rm -rf *.out
