@@ -1,9 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "tools.h"
 #include "vec3.h"
 #include <iostream>
-#include "tools.h"
 
 // recall that color is vec3 type
 inline void write_color(
@@ -17,10 +17,9 @@ inline void write_color(
 
   // Divide the color by the number of samples
   float scale = 1.0 / samples_per_pixel;
-
-  r *= scale;
-  g *= scale;
-  b *= scale;
+  r = sqrt(scale * r);
+  g = sqrt(scale * g);
+  b = sqrt(scale * b);
 
   // write translated [0, 255] value of each color component
   out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '

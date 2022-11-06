@@ -7,8 +7,8 @@ CCFLAGS=-DOMP
 all: pipe_to_img preview
 
 build:
-		/opt/homebrew/opt/gcc/bin/c++-12 -fopenmp -Wall main.cpp $(CCFLAGS) -o main.out
-		# g++ -std=c++11 main.cpp -o main.out
+	# /opt/homebrew/opt/gcc/bin/c++-12 -fopenmp -Wall main.cpp $(CCFLAGS) -o main.out
+	g++ -std=c++11 main.cpp -o main.out
 
 pipe_to_img: build
 	./main.out $(RESOLUTION) > image.ppm
@@ -20,3 +20,4 @@ preview:
 
 clean:
 	rm -rf *.out
+	rm image.*
