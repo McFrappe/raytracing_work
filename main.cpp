@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
    // world attr
    hittable_list world;
 
-   shared_ptr<lambertian> material_ground = make_shared<lambertian>(color(0.26, 0.29, 0.81));
-   shared_ptr<lambertian> material_center = make_shared<lambertian>(color(0.7, 0.3, 0.3));
-   shared_ptr<metal> material_left   = make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
-   shared_ptr<metal> material_right  = make_shared<metal>(color(0.81, 0.26, 0.31), 0.5);
+   shared_ptr<lambertian> material_ground = make_shared<lambertian>(color(0.26, 0.29, 	0.81));
+   shared_ptr<lambertian> material_center = make_shared<lambertian>(color(0.7, 	0.3, 	0.3));
+   shared_ptr<metal> material_left   = make_shared<metal>(color(0.8, 	0.8, 	0.8), 0.3);
+   shared_ptr<metal> material_right  = make_shared<metal>(color(0.81, 	0.26, 	0.31), 0.5);
 
    world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
    world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
@@ -91,32 +91,32 @@ int main(int argc, char **argv) {
 #pragma omp for schedule(static)
 	 for (int j = min; j < max; j++) {
 #else
-	    for (int j = 0; j < image_width; j++) {
+	 for (int j = 0; j < image_width; j++) {
 #endif
-	       color pixel_color(0, 0, 0);
+	    color pixel_color(0, 0, 0);
 
-	       for (int k = 0; k < samples_per_pixel; k++) {
-		  float u = (float(j) + random_float()) / (image_width - 1);
-		  float v = (float(i) + random_float()) / (image_height - 1);
-		  pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
-	       }
-
-#ifdef OMP
-	       image_content[j * i] = get_pixel(pixel_color, samples_per_pixel);
-#else
-	       write_color(std::cout, pixel_color, samples_per_pixel);
-#endif
+	    for (int k = 0; k < samples_per_pixel; k++) {
+	       float u = (float(j) + random_float()) / (image_width - 1);
+	       float v = (float(i) + random_float()) / (image_height - 1);
+	       pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
 	    }
-	 }
+
 #ifdef OMP
-	 free(chunks);
+	    image_content[j * i] = get_pixel(pixel_color, samples_per_pixel);
+#else
+	    write_color(std::cout, pixel_color, samples_per_pixel);
+#endif
+	 }
       }
-      // Write to cout so that we can pipe into the .ppm file
-      // TODO: rewrite to create file directly instead
-      for (int i = 0; i < image_height; i++)
-	 std::cout << image_content[i];
+#ifdef OMP
+      free(chunks);
+   }
+   // Write to cout so that we can pipe into the .ppm file
+   // TODO: rewrite to create file directly instead
+   for (int i = 0; i < image_height; i++)
+      std::cout << image_content[i];
 #endif
 
-      std::cerr << "\nDone.\n";
-      return 0;
-   }
+   std::cerr << "\nDone.\n";
+   return 0;
+}
