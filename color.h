@@ -6,7 +6,7 @@
 #include <cstring>
 
 // recall that color is vec3 type
-inline char get_pixel(color pixel_color, int samples_per_pixel) {
+inline char *get_pixel(color pixel_color, int samples_per_pixel) {
    float r = pixel_color.x();
    float g = pixel_color.y();
    float b = pixel_color.z();
@@ -27,7 +27,7 @@ inline char get_pixel(color pixel_color, int samples_per_pixel) {
    char *cstr = new char[pixel.length() + 1];
    std::strcpy(cstr, pixel.c_str());
 
-   return *cstr;
+   return cstr;
 }
 
 inline void write_color(std::ostream &out, color pixel_color, int samples_per_pixel) {

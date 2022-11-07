@@ -92,16 +92,16 @@ int main(int argc, char **argv) {
 	 }
 
 #ifdef OMP
-
-	       *image_content[i * image_height + j] = get_pixel(pixel_color, samples_per_pixel);
-	    }
-	 }
-	 // Write to cout so that we can pipe into the .ppm file
-	 // TODO: rewrite to create file directly instead
-	 for (int i = 0; i < image_width * image_height; i++)
-	    std::cout << image_content[i] << std::endl;
+#pragma omp critical
+	 image_content[i * image_height + j] = get_pixel(pixel_color, samples_per_pixel);
+      }
+   }
+   // Write to cout so that we can pipe into the .ppm file
+   // TODO: rewrite to create file directly instead
+   for (int i = 0; i < image_width * image_height; i++)
+      std::cout << image_content[i];
 #else
-	 write_color(std::cout, pixel_color, samples_per_pixel);
+   write_color(std::cout, pixel_color, samples_per_pixel);
       }
    }
 #endif
