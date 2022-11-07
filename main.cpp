@@ -49,13 +49,17 @@ int main(int argc, char **argv) {
    const int samples_per_pixel 	= 100;
    const int max_depth 		= 50;
 
+#ifdef OMP
+   char *image_content = (char*)calloc(sizeof(char), image_width * image_height);
+#endif
+
    // world attr
    hittable_list world;
 
-   auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-   auto material_center = make_shared<lambertian>(color(0.7, 0.3, 0.3));
-   auto material_left   = make_shared<metal>(color(0.8, 0.8, 0.8));
-   auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2));
+   shared_ptr<lambertian> material_ground = make_shared<lambertian>(color(0.26, 0.29, 0.81));
+   shared_ptr<lambertian> material_center = make_shared<lambertian>(color(0.7, 0.3, 0.3));
+   shared_ptr<metal> material_left   = make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
+   shared_ptr<metal> material_right  = make_shared<metal>(color(0.81, 0.26, 0.31), 0.5);
 
    world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
    world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.0),   0.5, material_center));
@@ -72,27 +76,47 @@ int main(int argc, char **argv) {
       std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
 
 #ifdef OMP
-      omp_set_num_threads(NUM_THREADS);
-#pragma omp parallel for \
-      shared(image_width, image_height, samples_per_pixel, i, world, cam) \
-      schedule(static)
-#endif
-      for (int j = 0; j < image_width; j++) {
-	 color pixel_color(0, 0, 0);
+      // Assign work for thread(s) (chunks)
+      int *chunks = (int*)calloc(sizeof(int), NUM_THREADS);
+      for (int c = 0; c < image_height; c++)
+	 chunks[c % NUM_THREADS] += 1;
 
-	 for (int k = 0; k < samples_per_pixel; k++) {
-	    float u = (float(j) + random_float()) / (image_width - 1);
-	    float v = (float(i) + random_float()) / (image_height - 1);
-	    pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
-	 }
+      omp_set_num_threads(NUM_THREADS);
+#pragma omp parallel \
+      shared(chunks, image_width, image_height, samples_per_pixel, i, world, cam)
+      {
+	 int id = omp_get_thread_num();
+	 int min = id * chunks[id];
+	 int max = min + chunks[id];
+#pragma omp for schedule(static)
+	 for (int j = min; j < max; j++) {
+#else
+	    for (int j = 0; j < image_width; j++) {
+#endif
+	       color pixel_color(0, 0, 0);
+
+	       for (int k = 0; k < samples_per_pixel; k++) {
+		  float u = (float(j) + random_float()) / (image_width - 1);
+		  float v = (float(i) + random_float()) / (image_height - 1);
+		  pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
+	       }
 
 #ifdef OMP
-#pragma omp critical
+	       image_content[j * i] = get_pixel(pixel_color, samples_per_pixel);
+#else
+	       write_color(std::cout, pixel_color, samples_per_pixel);
 #endif
-	 write_color(std::cout, pixel_color, samples_per_pixel);
+	    }
+	 }
+#ifdef OMP
+	 free(chunks);
       }
-   }
+      // Write to cout so that we can pipe into the .ppm file
+      // TODO: rewrite to create file directly instead
+      for (int i = 0; i < image_height; i++)
+	 std::cout << image_content[i];
+#endif
 
-   std::cerr << "\nDone.\n";
-   return 0;
-}
+      std::cerr << "\nDone.\n";
+      return 0;
+   }
