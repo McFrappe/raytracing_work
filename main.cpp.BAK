@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
    const int max_depth 		= 50;
 
 #ifdef OMP
-   char **image_content = (char**)calloc(sizeof(char*), image_width * image_height);
+   char *image_content = (char*)calloc(sizeof(char), image_width * image_height);
 #endif
 
    // world attr
@@ -72,39 +72,51 @@ int main(int argc, char **argv) {
    // render image
    printf("P3\n%d %d\n255\n", image_width, image_height);
 
-#ifdef OMP
-#pragma omp parallel for \
-   shared(image_width, image_height, samples_per_pixel, world, cam) \
-   schedule(static) collapse(2)
-   for (int i = image_height - 1; i >= 0; i--) {
-      for (int j = 0; j < image_width; j++) {
-#else
    for (int i = image_height - 1; i >= 0; i--) {
       std::cerr << "\nScanlines remaining: " << i  << ' ' << std::flush;
-      for (int j = 0; j < image_width; j++) {
-#endif
-	 color pixel_color(0, 0, 0);
-
-	 for (int k = 0; k < samples_per_pixel; k++) {
-	    float u = (float(j) + random_float()) / (image_width - 1);
-	    float v = (float(i) + random_float()) / (image_height - 1);
-	    pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
-	 }
 
 #ifdef OMP
+      // Assign work for thread(s) (chunks)
+      int *chunks = (int*)calloc(sizeof(int), NUM_THREADS);
+      for (int c = 0; c < image_height; c++)
+	 chunks[c % NUM_THREADS] += 1;
 
-	       *image_content[i * image_height + j] = get_pixel(pixel_color, samples_per_pixel);
-	    }
-	 }
-	 // Write to cout so that we can pipe into the .ppm file
-	 // TODO: rewrite to create file directly instead
-	 for (int i = 0; i < image_width * image_height; i++)
-	    std::cout << image_content[i] << std::endl;
+      omp_set_num_threads(NUM_THREADS);
+#pragma omp parallel \
+      shared(chunks, image_width, image_height, samples_per_pixel, i, world, cam)
+      {
+	 int id = omp_get_thread_num();
+	 int min = id * chunks[id];
+	 int max = min + chunks[id];
+#pragma omp for schedule(static)
+	 for (int j = min; j < max; j++) {
 #else
-	 write_color(std::cout, pixel_color, samples_per_pixel);
-      }
-   }
+	 for (int j = 0; j < image_width; j++) {
 #endif
+	    color pixel_color(0, 0, 0);
+
+	    for (int k = 0; k < samples_per_pixel; k++) {
+	       float u = (float(j) + random_float()) / (image_width - 1);
+	       float v = (float(i) + random_float()) / (image_height - 1);
+	       pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
+	    }
+
+#ifdef OMP
+	    image_content[j * i] = get_pixel(pixel_color, samples_per_pixel);
+#else
+	    write_color(std::cout, pixel_color, samples_per_pixel);
+#endif
+	 }
+      }
+#ifdef OMP
+      free(chunks);
+   }
+   // Write to cout so that we can pipe into the .ppm file
+   // TODO: rewrite to create file directly instead
+   for (int i = 0; i < image_height; i++)
+      std::cout << image_content[i];
+#endif
+
    std::cerr << "\nDone.\n";
    return 0;
 }
