@@ -22,9 +22,9 @@ inline char *get_pixel(color pixel_color, int samples_per_pixel) {
    std::string red = std::to_string(static_cast<int>(256 * clamp(r, 0.0, 0.999)));
    std::string green = std::to_string(static_cast<int>(256 * clamp(g, 0.0, 0.999)));
    std::string blue = std::to_string(static_cast<int>(256 * clamp(b, 0.0, 0.999)));
-   std::string pixel = red + ' ' + green + ' ' + blue + '\n';
+   std::string pixel = red + ' ' + green + ' ' + blue + '\n' + '\0';
 
-   char *cstr = new char[pixel.length() + 1];
+   char *cstr = new char[pixel.length() + 2];
    std::strcpy(cstr, pixel.c_str());
 
    return cstr;
