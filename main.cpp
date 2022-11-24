@@ -154,6 +154,9 @@ color ray_color(const ray &r, const hittable &world, int depth) {
 }
 
 int main(int argc, char **argv) {
+  #ifdef OMP
+    printf("Using OpenMP\n");
+  #endif
   // image
   const float aspect_ratio = 16.0 / 9.0;
   const int image_width = atoi(argv[1]);
