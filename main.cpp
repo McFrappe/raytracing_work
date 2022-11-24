@@ -1,5 +1,5 @@
 #ifdef OMP
-#include "/opt/homebrew/opt/libomp/include/omp.h"
+#include "omp.h"
 #endif
 
 #include "camera.h"
@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include "/opt/homebrew/opt/libjpeg/include/jpeglib.h"
+#include "jpeglib.h"
 
 #define NUM_THREADS 10
 
@@ -186,13 +186,15 @@ int main(int argc, char **argv) {
 
   // render image
   printf("width: %d\nheight: %d\n", image_width, image_height);
+  int pixel_count = 1;
 
 #pragma omp parallel for shared(image_width, image_height, samples_per_pixel,  \
     world, cam) schedule(guided) collapse(2)
   for (int i = image_height - 1; i >= 0; i--) {
     for (int j = 0; j < image_width; j++) {
-      color pixel_color(0, 0, 0);
-
+     color pixel_color(0, 0, 0);
+     printf("\rRendering pixel %d out of %d - %.1f%%", pixel_count, image_height*image_width,(((float)pixel_count/((float)image_width*image_height))*100));
+     pixel_count++;
       for (int k = 0; k < samples_per_pixel; k++) {
 	float u = (float(j) + random_float()) / (image_width - 1);
 	float v = (float(i) + random_float()) / (image_height - 1);

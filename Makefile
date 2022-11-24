@@ -5,17 +5,16 @@ OMP=0
 # make CCFLAGS=-DOUTPUT PROG=exercise2
 CCFLAGS=-DOMP
 
-all: serial omp omp_to_image serial_to_img preview
 
-serial:
-	/opt/homebrew/opt/gcc/bin/c++-12 -L/opt/homebrew/opt/libjpeg/lib -ljpeg main.cpp $(CCFLAGS) -o main.out
-omp:
-	/opt/homebrew/opt/gcc/bin/c++-12 -fopenmp -L/opt/homebrew/opt/libjpeg/lib -ljpeg -Wall main.cpp $(CCFLAGS) -o main.out
+serial_compile:
+	c++ main.cpp $(CCFLAGS) -o main.out  -ljpeg
+omp_compile:
+	c++ -fopenmp -Wall main.cpp $(CCFLAGS) -o main.out -ljpeg 
 
-omp_to_img: omp
+omp_to_img: omp_compile
 	./main.out $(RESOLUTION)
 
-serial_to_img: serial
+serial_to_img: serial_compile
 	./main.out $(RESOLUTION)
 
 preview:
