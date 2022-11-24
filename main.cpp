@@ -7,14 +7,15 @@
 #include "hittable_list.h"
 #include "material.h"
 #include "sphere.h"
+#include <chrono>
 
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include "jpeglib.h"
 
-#define NUM_THREADS 10
-
+#define NUM_THREADS 16
+using namespace std::chrono;
 GLOBAL(void) write_JPEG_file(
     char *filename,
     int image_width,
@@ -157,6 +158,8 @@ int main(int argc, char **argv) {
   #ifdef OMP
     printf("Using OpenMP\n");
   #endif
+  auto start = high_resolution_clock::now();
+
   // image
   const float aspect_ratio = 16.0 / 9.0;
   const int image_width = atoi(argv[1]);
@@ -199,9 +202,9 @@ int main(int argc, char **argv) {
      printf("\rRendering pixel %d out of %d - %.1f%%", pixel_count, image_height*image_width,(((float)pixel_count/((float)image_width*image_height))*100));
      pixel_count++;
       for (int k = 0; k < samples_per_pixel; k++) {
-	float u = (float(j) + random_float()) / (image_width - 1);
-	float v = (float(i) + random_float()) / (image_height - 1);
-	pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
+        float u = (float(j) + random_float()) / (image_width - 1);
+        float v = (float(i) + random_float()) / (image_height - 1);
+        pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
       }
 
       memcpy(
@@ -212,7 +215,8 @@ int main(int argc, char **argv) {
   }
 
   write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 100);
+  auto stop = high_resolution_clock::now();
 
-  printf("Done.\n");
+  printf("Done. - took: %ds\n ",  duration_cast<seconds>(stop - start));
   return 0;
 }
