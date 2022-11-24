@@ -17,7 +17,7 @@ endif
 pipe_to_img: build
 	./main.out $(RESOLUTION) > image.ppm
 	convert image.ppm image.jpeg
-	# rm image.ppm
+	rm image.ppm
 
 preview:
 	imgcat image.jpeg
