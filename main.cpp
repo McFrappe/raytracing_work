@@ -1,5 +1,6 @@
 #ifdef OMP
-#include "/opt/homebrew/opt/libomp/include/omp.h"
+// #include "/opt/homebrew/opt/libomp/include/omp.h"
+#include <omp.h>
 #endif
 
 #include "camera.h"
@@ -11,7 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include "/opt/homebrew/opt/libjpeg/include/jpeglib.h"
+#include <jpeglib.h>
 
 #define NUM_THREADS 10
 
@@ -192,7 +193,7 @@ int main(int argc, char **argv) {
 
 #ifdef OMP
 #pragma omp parallel for shared(image_width, image_height, samples_per_pixel,  \
-                                world, cam) schedule(guided) collapse(2)
+				world, cam) schedule(guided) collapse(2)
   for (int i = image_height - 1; i >= 0; i--) {
     for (int j = 0; j < image_width; j++) {
 #else
@@ -203,19 +204,19 @@ int main(int argc, char **argv) {
       color pixel_color(0, 0, 0);
 
       for (int k = 0; k < samples_per_pixel; k++) {
-        float u = (float(j) + random_float()) / (image_width - 1);
-        float v = (float(i) + random_float()) / (image_height - 1);
-        pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
+	float u = (float(j) + random_float()) / (image_width - 1);
+	float v = (float(i) + random_float()) / (image_height - 1);
+	pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
       }
 
 #ifdef OMP
       memcpy(
-	  &image_content[i * image_width + j],
+	  &image_content[(i * image_width + j) * 3],
 	  get_pixel(pixel_color, samples_per_pixel),
 	  sizeof(unsigned char) * 3);
     }
   }
-  write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 50);
+  write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 100);
 
 #else
       write_color(std::cout, pixel_color, samples_per_pixel);
