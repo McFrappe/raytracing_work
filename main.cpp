@@ -161,19 +161,19 @@ int main(int argc, char **argv) {
   const int samples_per_pixel = 100;
   const int max_depth = 50;
   unsigned char *image_content =
-      (unsigned char *)calloc(sizeof(unsigned char), image_width * image_height * 3);
+    (unsigned char *)calloc(sizeof(unsigned char), image_width * image_height * 3);
 
   // world attr
   hittable_list world;
 
   shared_ptr<lambertian> material_ground =
-      make_shared<lambertian>(color(0.26, 0.29, 0.81));
+    make_shared<lambertian>(color(0.26, 0.29, 0.81));
   shared_ptr<lambertian> material_center =
-      make_shared<lambertian>(color(0.7, 0.3, 0.3));
+    make_shared<lambertian>(color(0.7, 0.3, 0.3));
   shared_ptr<metal> material_left =
-      make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
+    make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
   shared_ptr<metal> material_right =
-      make_shared<metal>(color(0.81, 0.26, 0.31), 0.5);
+    make_shared<metal>(color(0.81, 0.26, 0.31), 0.5);
 
   world.add(
       make_shared<sphere>(point3(0.0, -100.5, -1.0), 100.0, material_ground));
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
   camera cam;
 
   // render image
-  printf("P3\n%d %d\n255\n", image_width, image_height);
+  printf("Image width: %d\nImage height: %d\n", image_width, image_height);
 
 #pragma omp parallel for shared(image_width, image_height, samples_per_pixel,  \
     world, cam) schedule(guided) collapse(2)
@@ -208,6 +208,6 @@ int main(int argc, char **argv) {
 
   write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 100);
 
-  std::cout << "\nDone.\n";
+  std::cout << "Done.\n";
   return 0;
 }
