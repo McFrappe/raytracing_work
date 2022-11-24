@@ -1,0 +1,18 @@
+name: C/C++ CI
+
+on:
+  push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: make
+      run: make omp_to_img RESOLUTION=100
+    - uses: actions/upload-artifact@v3
+      with:
+        name: image
+        path: ./image.jpeg
