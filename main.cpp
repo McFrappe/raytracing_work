@@ -160,11 +160,8 @@ int main(int argc, char **argv) {
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   const int samples_per_pixel = 100;
   const int max_depth = 50;
-
-#ifdef OMP
   unsigned char *image_content =
       (unsigned char *)calloc(sizeof(unsigned char), image_width * image_height * 3);
-#endif
 
   // world attr
   hittable_list world;
@@ -190,38 +187,27 @@ int main(int argc, char **argv) {
   // render image
   printf("P3\n%d %d\n255\n", image_width, image_height);
 
-#ifdef OMP
 #pragma omp parallel for shared(image_width, image_height, samples_per_pixel,  \
-                                world, cam) schedule(guided) collapse(2)
+    world, cam) schedule(guided) collapse(2)
   for (int i = image_height - 1; i >= 0; i--) {
     for (int j = 0; j < image_width; j++) {
-#else
-  for (int i = image_height - 1; i >= 0; i--) {
-    std::cerr << "\nScanlines remaining: " << i << ' ' << std::flush;
-    for (int j = 0; j < image_width; j++) {
-#endif
       color pixel_color(0, 0, 0);
 
       for (int k = 0; k < samples_per_pixel; k++) {
-        float u = (float(j) + random_float()) / (image_width - 1);
-        float v = (float(i) + random_float()) / (image_height - 1);
-        pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
+	float u = (float(j) + random_float()) / (image_width - 1);
+	float v = (float(i) + random_float()) / (image_height - 1);
+	pixel_color += ray_color(cam.get_ray(u, v), world, max_depth);
       }
 
-#ifdef OMP
       memcpy(
-	  &image_content[i * image_width + j],
+	  &image_content[(i * image_width + j) * 3],
 	  get_pixel(pixel_color, samples_per_pixel),
 	  sizeof(unsigned char) * 3);
     }
   }
-  write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 50);
 
-#else
-      write_color(std::cout, pixel_color, samples_per_pixel);
-    }
-  }
-#endif
-  std::cerr << "\nDone.\n";
+  write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 100);
+
+  std::cout << "\nDone.\n";
   return 0;
 }
