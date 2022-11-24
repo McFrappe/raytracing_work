@@ -1,10 +1,7 @@
 name: C/C++ CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push
 
 jobs:
   build:
@@ -13,10 +10,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: dependencies
-      run: sudo apt-get install libjpeg-dev libomp-dev gcc-multilib
     - name: make
-      run: make omp_to_img RESOLUTION=3480
+      run: make omp_to_img RESOLUTION=2000
     - uses: actions/upload-artifact@v3
       with:
         name: image
