@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
   camera cam;
 
   // render image
-  printf("Image width: %d\nImage height: %d\n", image_width, image_height);
+  printf("width: %d\nheight: %d\n", image_width, image_height);
 
 #pragma omp parallel for shared(image_width, image_height, samples_per_pixel,  \
     world, cam) schedule(guided) collapse(2)
@@ -208,6 +208,6 @@ int main(int argc, char **argv) {
 
   write_JPEG_file((char *)"image.jpeg", image_width, image_height, image_content, 100);
 
-  std::cout << "Done.\n";
+  printf("Done.\n");
   return 0;
 }
