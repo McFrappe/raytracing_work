@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
       }
 
       memcpy(
-	  &image_content[(i * image_width + j) * 3],
+	  &image_content[((image_width * image_height) - (i * image_width + j)) * 3],
 	  get_pixel(pixel_color, samples_per_pixel),
 	  sizeof(unsigned char) * 3);
     }
