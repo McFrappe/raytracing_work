@@ -1,4 +1,4 @@
-
+OS := $(shell uname)
 RESOLUTION=500
 OMP=0
 
@@ -9,16 +9,17 @@ CCFLAGS=-DOMP
 all: serial omp omp_to_image serial_to_img preview
 
 serial:
-ifneq ("$(shell uname -s)", "Darwin")
-	c++-12 -fopenmp -ljpeg main.cpp $(CCFLAGS) -o main.out
+ifneq ($(OS), Darwin)
+	c++ main.cpp $(CCFLAGS) -o main.out -ljpeg
 else
-	c++ -ljpeg main.cpp $(CCFLAGS) -o main.out
+	c++-12 -fopenmp main.cpp $(CCFLAGS) -o main.out -ljpeg
 endif
+
 omp:
-ifneq ("$(shell uname -s)", "Darwin")
-	c++ -fopenmp -ljpeg main.cpp $(CCFLAGS) -o main.out
+ifneq ($(OS), Darwin)
+	c++ -fopenmp main.cpp $(CCFLAGS) -o main.out -ljpeg
 else
-	c++-12 -fopenmp -ljpeg main.cpp $(CCFLAGS) -o main.out
+	c++-12 -fopenmp main.cpp $(CCFLAGS) -o main.out -ljpeg
 endif
 
 omp_to_img: omp
