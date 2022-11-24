@@ -17,4 +17,7 @@ jobs:
       run: sudo apt-get install libjpeg-dev libomp-dev gcc-multilib
     - name: make
       run: make omp_to_img RESOLUTION=3480
-
+    - uses: actions/upload-artifact@v3
+      with:
+        name: image
+        path: ./image.jpeg
