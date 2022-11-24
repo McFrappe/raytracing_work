@@ -1,5 +1,5 @@
 #ifdef OMP
-#include "/opt/homebrew/opt/libomp/include/omp.h"
+#include "omp.h"
 #endif
 
 #include "camera.h"
@@ -8,10 +8,10 @@
 #include "material.h"
 #include "sphere.h"
 
+#include "jpeglib.h"
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include "/opt/homebrew/opt/libjpeg/include/jpeglib.h"
 
 #define NUM_THREADS 10
 
