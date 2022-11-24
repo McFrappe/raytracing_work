@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: dependencies
-      run: apt-get install libjpeg-dev libomp-dev gcc-multilib
+      run: sudo apt-get install libjpeg-dev libomp-dev gcc-multilib
     - name: make
       run: make omp_to_img RESOLUTION=3480
 
