@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: make
-      run: make omp_to_img RESOLUTION=3840
+      run: make omp_to_img RESOLUTION=1200
     - uses: actions/upload-artifact@v3
       with:
         name: image
