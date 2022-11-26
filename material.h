@@ -57,19 +57,19 @@ class metal : public material {
 
 class dialectric : public material {
   public:
-    dialectric(double index_of_refraction) : ir(index_of_refraction) {}
+    dialectric(float index_of_refraction) : ir(index_of_refraction) {}
 
     virtual bool scatter(
 	const ray &r_in, const hit_record &rec, color &attenuation, ray &scattered
 	) const override {
       attenuation = color(1.0, 1.0, 1.0);
-      float refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
+      auto refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
       vec3 unit_direction = unit_vector(r_in.direction());
       vec3 refracted = refract(unit_direction, rec.normal, refraction_ratio);
 
-      float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-      float sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+      auto cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+      auto sin_theta = sqrt(1.0 - cos_theta*cos_theta);
 
       bool cannot_refract = refraction_ratio * sin_theta > 1.0;
       vec3 direction;
