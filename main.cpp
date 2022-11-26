@@ -169,8 +169,9 @@ int main(int argc, char **argv) {
   shared_ptr<lambertian> material_ground =
     make_shared<lambertian>(color(0.26, 0.29, 0.81));
   shared_ptr<lambertian> material_center =
-    make_shared<lambertian>(color(0.7, 0.3, 0.3));
-  shared_ptr<metal> material_left =
+    make_shared<lambertian>(color(0.1, 0.2, 0.5));
+  shared_ptr<dialectric> material_left =
+    make_shared<dialectric>(1.5);
     make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
   shared_ptr<metal> material_right =
     make_shared<metal>(color(0.81, 0.26, 0.31), 0.5);
@@ -178,7 +179,7 @@ int main(int argc, char **argv) {
   world.add(
       make_shared<sphere>(point3(0.0, -100.5, -1.0), 100.0, material_ground));
   world.add(make_shared<sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
-  world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
+  world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), -0.4, material_left));
   world.add(make_shared<sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
 
   // camera
@@ -200,7 +201,7 @@ int main(int argc, char **argv) {
       }
 
       memcpy(
-	  &image_content[((image_width * image_height) - (i * image_width + j)) * 3],
+	  &image_content[((i * image_width + j)) * 3],
 	  get_pixel(pixel_color, samples_per_pixel),
 	  sizeof(unsigned char) * 3);
     }
